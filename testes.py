@@ -1,4 +1,0 @@
-import arquivo
-
-
-arquivo.cadastroUsuario()
