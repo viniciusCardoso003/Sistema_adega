@@ -1,3 +1,4 @@
+#Modulo com funções de cunho estético para o Sistema
 
 def linha(tam = 42):
     print('-' * tam)
