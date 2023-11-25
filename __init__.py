@@ -1,84 +1,115 @@
-#Modulo com funções de cunho estético para o Sistema
+import uteis
 
-def linha(tam = 42):
-    print('-' * tam)
+def cadastroUsuario():
+    uteis.cabecalho('Cadastro novo usuário'.center(42))
+    nomeUsuario = str(input('Nome Usuario: '))
+    senha = str(input('Senha: '))
 
-def cabecalho (msg):
-    """
-    -> Função titulo exibe mensagem de titulo com borda em '=='
-    :param msg: recebe mensagem a ser mostrada
-    Função criada por Vinicius Cardoso
-    """
-    linha()
-    print(msg)
-    linha()
+    try:
+        arq = 'usuarios.txt'
+        a = open(arq, 'at')
+        a.write(f'{nomeUsuario};{senha}\n')
+    except:
+        print(uteis.fonteVermelha('ERRO ao adionar usuário'))
+    else:
+        print(uteis.fonteVerde('USUÁRIO ADICIONADO COM SUCESSO'))
+        a.close()
 
-def fonteCiano(msg):
-    return f'\033[36m{msg}\033[m'
-
-def fonteVermelha(msg):
-    return f'\033[31m{msg}\033[m'
-
-def fonteVerde(msg):
-    return f'\033[32m{msg}\033[m'
-
-def fonteAmarela(msg):
-    return f'\033[33m{msg}\033[m'
-
-def leiaInt(msg='Infome um número Inteiro: '):
-    while True:
-        try:
-            i = int(input(msg))
-        except (ValueError, TypeError):
-            print(f'\033[31mERRO! NÃO é um número inteiro. TENTE NOVAMENTE\033[m')
-        else:
-            break
-    return i
-
-def leiaFloat(msg='Infome um número Decimal: '):
-    while True:
-        try:
-            f = float(msg)
-        except (ValueError, TypeError):
-            print(f'\033[31mERRO! NÃO é um número Decimal. TENTE NOVAMENTE\033[m')
-        else:
-            break
-    return f
-
-def leiaDinheiro(msg='Digite o preço:R$ '):
-    """
-    -> Valida dado convertendo-o valor digitado em float.
-    :param n: mensagem a ser exibida no input
-    :return: float de n
-    """
-    valido = False
-    while not valido:
-        try:
-            entrada = str(input(msg)).replace(',','.').strip()
-            if entrada.isalpha() or entrada == '':
-                print(f'\033[0;31mERR0! {entrada} NÃO é um valor válido!\033[m')
-            else:
-                valido = True
-                return float(entrada)
-        except (ValueError, TypeError):
-            print('Valor inserido não é válido tente novamente')
-            valido = False
-
-def menu (lista):
-    cabecalho('MENU PRINCIPAL'.center(42))
-    c = 1
-    for p in lista:
-        print(f'{fonteVerde(c)} - {fonteAmarela(p)}')
-        c += 1
-    linha()
-
-    while True:
-        resp = leiaInt(fonteCiano('Sua opção? '))    
-        if resp >= 1 and resp <= c:
-            print(fonteVerde(f'Opção {resp} selecionada'))
-            break
-        else:
-            print(fonteVermelha('Opção Inválida.Tente novamente.'))    
-    return resp
-     
+def login():
+    uteis.cabecalho('LOGIN NO SISTEMA')
+    try:
+        arq = 'usuarios.txt'
+        a = open(arq, 'rt')
+    except:
+        print(uteis.fonteVermelha('ERRO de execução'))
+    else:
+        nomeUsuario = str(input('Nome: '))
+        senha = str(input('Senha: '))
+        for linha in a:
+            dado = linha.split(';')
+            dado[1] = dado[1].replace('\n','')
+            nomeArquivado = dado[0]
+            senhaArquivada = dado[1]
+            if nomeArquivado == nomeUsuario and senhaArquivada == senha:
+                print(uteis.fonteVerde(f'Acesso de {nomeUsuario} LIBERADO!'))
+                return True
+            
+        print(uteis.fonteVermelha('Dados Incorretos,acesso negado'))
+        return False
         
+def arquivoExiste(nomeArquivo):
+    try:
+        a = open(nomeArquivo, 'rt')
+        a.close
+    except FileNotFoundError:
+        return False
+    else:
+        return True
+    
+def criarArquivo (nomeArquivo):
+    try:
+        a = open(nomeArquivo, 'wt+')
+        a.close()
+    except:
+        print('Houve um Erro na criação do Arquivo')
+    else:
+        print(f'Arquivo: {nomeArquivo} criado com sucesso!')
+
+def lerArquivo(nomeArquivo):
+    try:
+        a = open(nomeArquivo, 'rt', encoding='utf-8')
+    except:
+        print('Erro ao ler o arquivo')
+    else:
+        uteis.cabecalho('ITENS CADASTRADOS'.center(42))
+        for linha in a:
+            dado = linha.split(';')
+            dado[2] = dado[2].replace('\n','')
+            print(f'PRODUTO: {dado[0]:<10}  PREÇO: R${dado[1]:>5}  QTD.:{dado[2]:>5}')
+    finally:
+        a.close()
+
+def novoCadastro(arq, nomeProduto='desconhecido', preco=0.0, quantidade=0):
+    try:
+        a = open(arq, 'at')
+    except:
+        print('Houve um ERRO na abertura do arquivo')
+    else:
+        try:
+            a.write(f'{nomeProduto};{preco};{quantidade}\n')
+        except:
+            print('Houve um erro ao adionar dados')
+        else:
+            print(f'PRODUTO: {nomeProduto} - PREÇO: R${preco} - Quantidade: {quantidade}')
+            print(uteis.fonteVerde('ADICIONADO COM SUCESSO'))
+            a.close()
+
+def totalEmEstoque(arq):
+    try:
+        a = open(arq, 'rt')
+    except:
+        print('Houve um ERRO na abertura do arquivo')
+    else: 
+        total_geral = 0
+        for linha in a:
+            total_produto = 0
+            dado = linha.split(';')
+            dado[2] = dado[2].replace('\n','')
+            qtd_produto = int(dado[2])
+            preco = float(dado[1])
+            total_produto = qtd_produto * preco
+            total_geral += total_produto
+            
+        return f'Total em Estoque: R$ {total_geral:.2f} reais'
+    finally:
+        a.close()
+        
+  
+        
+
+
+
+
+
+
+    
